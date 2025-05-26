@@ -1,18 +1,24 @@
+import { createMenus } from './menu.js'
+
 const ALLOW_URL_LIST = ["about:", "moz-extension:"]
-// const BLOCK_URL_LIST = [".*"]
-const BLOCK_URL_LIST = []
-const BLOCK_TIME_LIST = [("0000", "2400")]
+const BLOCK_URL_LIST = [".*"]
+// const BLOCK_URL_LIST = []
+const BLOCK_TIME_LIST = [["0000", "0900"], ["2300", "2400"]]
+BLOCK_TIME_LIST.push(["0000", "2400"])
+
+const BLOCKED_HTML = "blocked.html"
 
 function isRegexMatch(input, re) {
-    // fix regex
-    try {
-      const regex = new RegExp(re);
-      return regex.test(input);
-    } catch (e) {
-      console.error("Invalid regular expression:", e);
-      return false;
-    }
+  // fix regex
+  try {
+    const regex = new RegExp(re);
+    return regex.test(input);
+  } catch (e) {
+    console.error("Invalid regular expression:", e);
+    return false;
   }
+}
+
 function handleTabCreated() {
     // console.log("handleTabCreated: ");
 }
@@ -25,49 +31,42 @@ function shouldBlockTab(tabInfo) {
 
     //check url applicable
     const url = new URL(tabInfo.url)
-    console.log(url)
     if (ALLOW_URL_LIST.some((re) => isRegexMatch(url.protocol, re))) return false
     if (!BLOCK_URL_LIST.some((re) => isRegexMatch(url.host, re))) return false
 
     // check time acceptable
-    // for ((start, end) in BLOCK_TIME_LIST) {
-    //     const hours = parseInt(timeStr.slice(0, 2), 10);
-    //     const minutes = parseInt(timeStr.slice(2, 4), 10);
+    const curDate = new Date()
+    for (const blockStartEnd of BLOCK_TIME_LIST) {
+      const startDate = new Date()
+      startDate.setHours(parseInt(blockStartEnd[0].slice(0, 2), 10))
+      startDate.setMinutes(parseInt(blockStartEnd[0].slice(2, 4), 10))
 
-    // }
-    // const date = Date()
+      const endDate = new Date()
+      endDate.setHours(parseInt(blockStartEnd[1].slice(0, 2), 10))
+      endDate.setMinutes(parseInt(blockStartEnd[1].slice(2, 4), 10))
 
+      if (startDate <= curDate && curDate <= endDate) return true
+    }
 
-    
-
-    return true
+    return false
 
 }
 
 function handleTabUpdated(tabId, changeInfo, tabInfo) {
-    // console.log(`Updated tab: ${tabId}`);
-    // console.log("Changed attributes: ", changeInfo);
-    // console.log("New tab Info: ", tabInfo);
-    
-    // if (changeInfo.url) {
-    //     console.log(changeInfo.url)
-    //     if (changeInfo.url.includes("novel")) {
-    //         console.log("kill");
-    //     }
-    // }
-    
 
     if (tabInfo.status == "complete") {
         if (shouldBlockTab(tabInfo)) {
-            tabUpdate = {
+            const tabUpdate = {
                 loadReplace: true,
-                url: 'README.md'
+                url: BLOCKED_HTML
             }
             browser.tabs.update(tabId, tabUpdate);
         }
 	}
 
 }
+
+createMenus();
 
 browser.tabs.onCreated.addListener(handleTabCreated);
 browser.tabs.onUpdated.addListener(handleTabUpdated);
