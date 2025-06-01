@@ -10,7 +10,10 @@
     },
 
     "action": {
-        "default_icon": "icons/border-48.png"
+        "default_icon": "icons/border-48.png",
+        "default_title": "action testing",
+        "default_popup": "options.html"
+
     },
 
     "background": {
@@ -31,7 +34,8 @@
 
     "permissions": [
 		"tabs",
-        "menus"
+        "menus",
+        "storage"
 	]
 
 }

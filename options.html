@@ -1,17 +1,32 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="color-scheme" content="dark light" />
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <title>Site Blocker Settings</title>
+  <link href="/options.css" rel="stylesheet">
+</head>
+<body>
 
-  <body>
-    <form>
-      <label for="color">Favorite color</label>
-      <input type="text" id="color" name="color" />
-      <button type="submit">Save</button>
-    </form>
-    <script src="options.js"></script>
-  </body>
+  <h1>Site Blocker Settings</h1>
+
+  <div class="tabs">
+    <button id="tab0" class="tab-button active">tab0</button>
+    <button id="tab1" class="tab-button">tab1</button>
+    <button id="tab2" class="tab-button">tab2</button>
+  </div>
+
+  <!-- Tab -->
+  <div id="tab" class="tab-content active">
+    <label for="domains">Domains to Block (one per line):</label>
+    <textarea id="domains"></textarea>
+
+    <label for="time">Time to Block (e.g. 9am-5pm):</label>
+    <input type="text" id="times" />
+
+    <button id="savetab">Save</button>
+    <div id="status" class="status"></div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
 </html>

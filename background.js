@@ -4,7 +4,7 @@ const ALLOW_URL_LIST = ["about:", "moz-extension:"]
 const BLOCK_URL_LIST = [".*"]
 // const BLOCK_URL_LIST = []
 const BLOCK_TIME_LIST = [["0000", "0900"], ["2300", "2400"]]
-BLOCK_TIME_LIST.push(["0000", "2400"])
+// BLOCK_TIME_LIST.push(["0000", "2400"])
 
 const BLOCKED_HTML = "blocked.html"
 
