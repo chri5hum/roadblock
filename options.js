@@ -34,8 +34,8 @@ async function showTab(tabId, saveBeforeSwitch = true) {
     //update current selection
     const key = curTabId + 'data'
 
-    tabData = await browser.storage.local.get(key)
-    tabData = tabData[key] ? tabData[key] : {}
+    const result = await browser.storage.local.get(key)
+    tabData = result[key] ? result[key] : {}
 
     document.getElementById('domains').value = tabData['domains'] ? tabData['domains']: ""
     document.getElementById('times').value = tabData['times'] ? tabData['times'] : ""
@@ -43,15 +43,15 @@ async function showTab(tabId, saveBeforeSwitch = true) {
 
 function saveTab() {
     log('save tab')
-    
+
     tabData = {}
     tabData['domains'] = document.getElementById('domains').value
     tabData['times'] = document.getElementById('times').value
 
     const key = curTabId + 'data'
-    storeItem = {}
-    storeItem[key] = tabData
-    browser.storage.local.set(storeItem)
+    browser.storage.local.set({
+        [key]: tabData
+    })
 }
 
 init()
