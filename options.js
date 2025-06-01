@@ -1,6 +1,5 @@
 console.log('opened options.js')
 
-var isFirstRun = true;
 var curTabId = 'tab0';
 var tabData = {}
 
@@ -17,17 +16,15 @@ function init() {
     document.getElementById("tab2").addEventListener("click", () => showTab("tab2"));
 
     document.getElementById("savetab").addEventListener("click", () => saveTab());
-    showTab(curTabId);
+    showTab(curTabId, false);
 }
 
-async function showTab(tabId) {
-    console.log('show tabId: ', tabId)
-    if (isFirstRun) {
-        isFirstRun = false;
-        return;
-    }
-    saveTab(); //this needs to fixed to not run the first time
+async function showTab(tabId, saveBeforeSwitch = true) {
+    log('show tabId: ', tabId)
 
+    if (saveBeforeSwitch) {
+        saveTab();
+    }
 
     // update button to active
     document.getElementById(curTabId).classList.remove("active");
@@ -45,7 +42,8 @@ async function showTab(tabId) {
 }
 
 function saveTab() {
-    console.log('save tab')
+    log('save tab')
+    
     tabData = {}
     tabData['domains'] = document.getElementById('domains').value
     tabData['times'] = document.getElementById('times').value
