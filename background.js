@@ -1,10 +1,7 @@
 import { createMenus } from './menu.js'
 
 const ALLOW_URL_LIST = ["about:", "moz-extension:"]
-const BLOCK_URL_LIST = [".*"]
-// const BLOCK_URL_LIST = []
-const BLOCK_TIME_LIST = [["0000", "0900"], ["2300", "2400"]]
-const blockSets = []
+var blockSets = []
 // BLOCK_TIME_LIST.push(["0000", "2400"])
 
 const BLOCKED_HTML = "blocked.html"
@@ -25,6 +22,7 @@ function handleTabCreated() {
 }
 
 async function updateBlockSets() {
+  blockSets = []
     const blockSetKeys = ['tab0data', 'tab1data', 'tab2data']
     for (const blockSetKey of blockSetKeys) {
         await browser.storage.local.get(blockSetKey).then((result) => {
@@ -60,11 +58,8 @@ function shouldBlockTab(tabInfo) {
   const url = new URL(tabInfo.url)
   if (ALLOW_URL_LIST.some((re) => isRegexMatch(url.protocol, re))) return false
 
-  for (const blockSet in blockSets) {
-    if (shouldBlockTabByBlockSet(tabInfo, blockSet)) return true
-  }
+  return blockSets.some(blockSet => shouldBlockTabByBlockSet(tabInfo, blockSet))
 
-  return false
 }
 
 function shouldBlockTabByBlockSet(tabInfo, blockSet) {
@@ -72,7 +67,8 @@ function shouldBlockTabByBlockSet(tabInfo, blockSet) {
   const url = new URL(tabInfo.url)
   const blockUrlList = blockSet.domains
   const blockTimeList = blockSet.times
-  if (!blockUrlList.some((re) => isRegexMatch(url.host, re))) return false
+
+  if (blockUrlList.every((re) => !isRegexMatch(url.host, re))) return false
 
   // check time acceptable
   const curDate = new Date()
@@ -85,14 +81,19 @@ function shouldBlockTabByBlockSet(tabInfo, blockSet) {
     endDate.setHours(parseInt(blockStartEnd[1].slice(0, 2), 10))
     endDate.setMinutes(parseInt(blockStartEnd[1].slice(2, 4), 10))
 
-    if (startDate <= curDate && curDate <= endDate) return true
+    if (startDate <= curDate && curDate <= endDate) {
+      console.log('filtered by:', blockSet)
+      return true
+    }
   }
 
   return false
 }
 
 function shouldBlockTab_v0(tabInfo) {
-
+    const BLOCK_URL_LIST = [".*"]
+    const BLOCK_TIME_LIST = [["0000", "0900"], ["2300", "2400"]]
+    
     //check url applicable
     const url = new URL(tabInfo.url)
     if (ALLOW_URL_LIST.some((re) => isRegexMatch(url.protocol, re))) return false
@@ -116,10 +117,10 @@ function shouldBlockTab_v0(tabInfo) {
 
 }
 
-function handleTabUpdated(tabId, changeInfo, tabInfo) {
+async function handleTabUpdated(tabId, changeInfo, tabInfo) {
 
     if (tabInfo.status == "complete") {
-        updateBlockSets();
+        await updateBlockSets();
 
         if (shouldBlockTab(tabInfo)) {
             const tabUpdate = {
