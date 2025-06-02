@@ -48,22 +48,35 @@ async function updateBlockSets() {
             blockSetObject['times'] = ["0000-2400"];
           }
 
-          console.log(`Blocklist for ${blockSetKey}:`, blockSetObject);
+          // console.log(`Blocklist for ${blockSetKey}:`, blockSetObject);
           blockSets.push(blockSetObject);
       });
     }
+    console.log('blockSets: ', blockSets)
   
+}
+
+function shouldBlockTab(tabInfo) {
+  const url = new URL(tabInfo.url)
+  if (ALLOW_URL_LIST.some((re) => isRegexMatch(url.protocol, re))) return false
+
+  for (const blockSet in blockSets) {
+    if (shouldBlockTabByBlockSet(tabInfo, blockSet)) return true
+  }
+
+  return false
 }
 
 function shouldBlockTabByBlockSet(tabInfo, blockSet) {
   //check url applicable
   const url = new URL(tabInfo.url)
-  if (ALLOW_URL_LIST.some((re) => isRegexMatch(url.protocol, re))) return false
-  if (!BLOCK_URL_LIST.some((re) => isRegexMatch(url.host, re))) return false
+  const blockUrlList = blockSet.domains
+  const blockTimeList = blockSet.times
+  if (!blockUrlList.some((re) => isRegexMatch(url.host, re))) return false
 
   // check time acceptable
   const curDate = new Date()
-  for (const blockStartEnd of BLOCK_TIME_LIST) {
+  for (const blockStartEnd of blockTimeList) {
     const startDate = new Date()
     startDate.setHours(parseInt(blockStartEnd[0].slice(0, 2), 10))
     startDate.setMinutes(parseInt(blockStartEnd[0].slice(2, 4), 10))
