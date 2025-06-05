@@ -1,6 +1,6 @@
 console.log('opened options.js')
 
-var curTabId = 'tab0';
+var curConfigId = 'config0';
 var tabData = {}
 
 function log(text) {
@@ -11,44 +11,50 @@ function log(text) {
 }
 
 function init() {
-    document.getElementById("tab0").addEventListener("click", () => showTab("tab0"));
-    document.getElementById("tab1").addEventListener("click", () => showTab("tab1"));
-    document.getElementById("tab2").addEventListener("click", () => showTab("tab2"));
+    // set names
+
+    document.getElementById("config0").addEventListener("click", () => showTab("config0"));
+    document.getElementById("config1").addEventListener("click", () => showTab("config1"));
+    document.getElementById("config2").addEventListener("click", () => showTab("config2"));
 
     document.getElementById("savetab").addEventListener("click", () => saveTab());
-    showTab(curTabId, false);
+    showTab(curConfigId, false);
 }
 
 async function showTab(tabId, saveBeforeSwitch = true) {
-    log('show tabId: ', tabId)
-
     if (saveBeforeSwitch) {
         saveTab();
     }
 
     // update button to active
-    document.getElementById(curTabId).classList.remove("active");
-    curTabId = tabId;
-    document.getElementById(curTabId).classList.add("active");
+    document.getElementById(curConfigId).classList.remove("active");
+    curConfigId = tabId;
+    document.getElementById(curConfigId).classList.add("active");
 
     //update current selection
-    const key = curTabId + 'data'
+    const key = curConfigId + 'key'
 
     const result = await browser.storage.local.get(key)
     tabData = result[key] ? result[key] : {}
-
+    document.getElementById('blockConfigName').value = tabData['blockConfigName'] || "";
     document.getElementById('domains').value = tabData['domains'] ? tabData['domains']: ""
     document.getElementById('times').value = tabData['times'] ? tabData['times'] : ""
+    document.getElementById('blockConfigOverride').value = tabData['blockConfigOverride'] || "";
 }
 
 function saveTab() {
     log('save tab')
 
     tabData = {}
+    tabData['blockConfigId'] = curConfigId
+    tabData['blockConfigName'] = document.getElementById('blockConfigName').value
     tabData['domains'] = document.getElementById('domains').value
     tabData['times'] = document.getElementById('times').value
+    tabData['blockConfigOverride'] = document.getElementById('blockConfigOverride').value
 
-    const key = curTabId + 'data'
+    const key = curConfigId + 'key'
+    log(`Saving tab data for ${key}: ${tabData}`)
+    console.log(tabData)
     browser.storage.local.set({
         [key]: tabData
     })

@@ -1,7 +1,10 @@
 import { createMenus } from './menu.js'
+import { getBlockConfig, getOverride } from './common.js';
 
 const ALLOW_URL_LIST = ["about:", "moz-extension:"]
-var blockSets = []
+var blockConfigs = []
+const blockConfigOverrides = {}
+
 // BLOCK_TIME_LIST.push(["0000", "2400"])
 
 const BLOCKED_HTML = "blocked.html"
@@ -21,45 +24,35 @@ function handleTabCreated() {
     // console.log("handleTabCreated: ");
 }
 
-async function updateBlockSets() {
-  blockSets = []
-    const blockSetKeys = ['tab0data', 'tab1data', 'tab2data']
-    for (const blockSetKey of blockSetKeys) {
-        await browser.storage.local.get(blockSetKey).then((result) => {
-          if (!result || !result[blockSetKey]) {
-              console.warn(`No data found for ${blockSetKey}`);
-              return;
-          }
-
-          const blockSetObject = {
-            'domains': [],
-            'times': []
-          }
-          const data = result[blockSetKey];
-          if (!data['domains']) return;
-
-          blockSetObject['domains'] = data['domains'].split("\n")
-
-          if (data['times']) {
-            blockSetObject['times'] = data['times'].split(",").map((time) => time.split('-'));
-          } else {
-            blockSetObject['times'] = ["0000-2400"];
-          }
-
-          // console.log(`Blocklist for ${blockSetKey}:`, blockSetObject);
-          blockSets.push(blockSetObject);
-      });
+async function fetchBlockConfigs() {
+  blockConfigs = []
+  const blockConfigIds = ['config0', 'config1', 'config2']
+  for (const blockConfigId of blockConfigIds) {
+    const blockConfig = await getBlockConfig(blockConfigId);
+    if (!blockConfig) continue;
+    blockConfigs.push(blockConfig);
+    
+    const overrideData = await getOverride(blockConfig.blockConfigId);
+    if (overrideData) {
+      blockConfigOverrides[blockConfig.blockConfigId] = overrideData.until;
     }
-    console.log('blockSets: ', blockSets)
-  
+  }
+    
+  console.log("Updated block configs:", blockConfigs);
+  console.log("Block config overrides:", blockConfigOverrides);
 }
 
 function shouldBlockTab(tabInfo) {
   const url = new URL(tabInfo.url)
   if (ALLOW_URL_LIST.some((re) => isRegexMatch(url.protocol, re))) return false
 
-  return blockSets.some(blockSet => shouldBlockTabByBlockSet(tabInfo, blockSet))
-
+  for (const blockSet of blockConfigs) {
+    const blockingConfigId = shouldBlockTabByBlockSet(tabInfo, blockSet)
+    if (Boolean(blockingConfigId)) {
+      return blockingConfigId
+    }
+  }
+  return ""
 }
 
 function shouldBlockTabByBlockSet(tabInfo, blockSet) {
@@ -67,8 +60,16 @@ function shouldBlockTabByBlockSet(tabInfo, blockSet) {
   const url = new URL(tabInfo.url)
   const blockUrlList = blockSet.domains
   const blockTimeList = blockSet.times
+  
+  console.log("blockConfigOverrides:", blockConfigOverrides)
+  if (blockConfigOverrides[blockSet.blockConfigId]) {
+    if (blockConfigOverrides[blockSet.blockConfigId] > Date.now()) {
+      console.log(`Tab allowed by override until: ${new Date(blockConfigOverrides[blockSet.blockConfigId])}`);
+      return ""
+    }
+  }
 
-  if (blockUrlList.every((re) => !isRegexMatch(url.host, re))) return false
+  if (blockUrlList.every((re) => !isRegexMatch(url.host, re))) return ""
 
   // check time acceptable
   const curDate = new Date()
@@ -82,12 +83,11 @@ function shouldBlockTabByBlockSet(tabInfo, blockSet) {
     endDate.setMinutes(parseInt(blockStartEnd[1].slice(2, 4), 10))
 
     if (startDate <= curDate && curDate <= endDate) {
-      console.log('filtered by:', blockSet)
-      return true
+      return blockSet.blockConfigId
     }
   }
 
-  return false
+  return ""
 }
 
 function shouldBlockTab_v0(tabInfo) {
@@ -118,14 +118,14 @@ function shouldBlockTab_v0(tabInfo) {
 }
 
 async function handleTabUpdated(tabId, changeInfo, tabInfo) {
-
     if (tabInfo.status == "complete") {
-        await updateBlockSets();
+        await fetchBlockConfigs();
 
-        if (shouldBlockTab(tabInfo)) {
+        const blockingConfigId = shouldBlockTab(tabInfo);
+        if (blockingConfigId) {
             const tabUpdate = {
                 loadReplace: true,
-                url: BLOCKED_HTML
+                url: BLOCKED_HTML + `?id=${blockingConfigId}&url=${tabInfo.url}`
             }
             browser.tabs.update(tabId, tabUpdate);
         }

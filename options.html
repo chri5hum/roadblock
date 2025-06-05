@@ -10,18 +10,24 @@
   <h1>Site Blocker Settings</h1>
 
   <div class="tabs">
-    <button id="tab0" class="tab-button active">tab0</button>
-    <button id="tab1" class="tab-button">tab1</button>
-    <button id="tab2" class="tab-button">tab2</button>
+    <button id="config0" class="tab-button active">config0</button>
+    <button id="config1" class="tab-button">config1</button>
+    <button id="config2" class="tab-button">config2</button>
   </div>
 
   <!-- Tab -->
   <div id="tab" class="tab-content active">
+    <label for="blockConfigName">Block Config Name</label>
+    <input type="text" id="blockConfigName" />
+
     <label for="domains">Domains to Block (one per line):</label>
     <textarea id="domains"></textarea>
 
-    <label for="time">Times to Block (e.g. 0000-1400, 1500-2400):</label>
+    <label for="times">Times to Block (e.g. 0000-1400, 1500-2400):</label>
     <input type="text" id="times" />
+
+    <label for="blockConfigOverride">Override Text:</label>
+    <textarea id="blockConfigOverride"></textarea>
 
     <button id="savetab">Save</button>
     <div id="status" class="status"></div>
