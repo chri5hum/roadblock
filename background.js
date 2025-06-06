@@ -9,8 +9,14 @@ const blockConfigOverrides = {}
 
 const BLOCKED_HTML = "blocked.html"
 
+function substituteWildcard(input) {
+    // Replace '*' with '.*' to make it a valid regex
+    return input.replace('*', '.*');
+}
+
 function isRegexMatch(input, re) {
-    // fix regex
+    re = substituteWildcard(re)
+
     try {
         const regex = new RegExp(re);
         return regex.test(input);
@@ -64,7 +70,7 @@ function shouldBlockTabByBlockSet(tabInfo, blockSet) {
   console.log("blockConfigOverrides:", blockConfigOverrides)
   if (blockConfigOverrides[blockSet.blockConfigId]) {
     if (blockConfigOverrides[blockSet.blockConfigId] > Date.now()) {
-      console.log(`Tab allowed by override until: ${new Date(blockConfigOverrides[blockSet.blockConfigId])}`);
+      console.log(`Tab allowed past ${blockSet.blockConfigId} by override until: ${new Date(blockConfigOverrides[blockSet.blockConfigId])}`);
       return ""
     }
   }
@@ -88,33 +94,6 @@ function shouldBlockTabByBlockSet(tabInfo, blockSet) {
   }
 
   return ""
-}
-
-function shouldBlockTab_v0(tabInfo) {
-    const BLOCK_URL_LIST = [".*"]
-    const BLOCK_TIME_LIST = [["0000", "0900"], ["2300", "2400"]]
-    
-    //check url applicable
-    const url = new URL(tabInfo.url)
-    if (ALLOW_URL_LIST.some((re) => isRegexMatch(url.protocol, re))) return false
-    if (!BLOCK_URL_LIST.some((re) => isRegexMatch(url.host, re))) return false
-
-    // check time acceptable
-    const curDate = new Date()
-    for (const blockStartEnd of BLOCK_TIME_LIST) {
-      const startDate = new Date()
-      startDate.setHours(parseInt(blockStartEnd[0].slice(0, 2), 10))
-      startDate.setMinutes(parseInt(blockStartEnd[0].slice(2, 4), 10))
-
-      const endDate = new Date()
-      endDate.setHours(parseInt(blockStartEnd[1].slice(0, 2), 10))
-      endDate.setMinutes(parseInt(blockStartEnd[1].slice(2, 4), 10))
-
-      if (startDate <= curDate && curDate <= endDate) return true
-    }
-
-    return false
-
 }
 
 async function handleTabUpdated(tabId, changeInfo, tabInfo) {
