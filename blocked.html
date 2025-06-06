@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Override Paragraph</title>
+  <link href="blocked.css" rel="stylesheet">
+</head>
+<body>
+  <text id="blockedReason">Site has been blocked by block set x</text>
+
+  <div class="paragraph-box" inert>
+    <p id="displayParagraph">This is the current paragraph content.</p>
+  </div>
+
+  <textarea id="paragraphInput" placeholder="To override block, type the above paragaph..."></textarea>
+
+  <div class="override-controls">
+    <button id="overrideBtn">Override</button>
+    <span>for</span>
+    <select id="overrideDuration">
+      <option value="5">5 minutes</option>
+      <option value="15">15 minutes</option>
+      <option value="30">30 minutes</option>
+    </select>
+  </div>
+  <script src="blocked.js" type="module"></script>
+
+</body>
+</html>
