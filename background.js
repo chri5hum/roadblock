@@ -43,9 +43,6 @@ async function fetchBlockConfigs() {
       blockConfigOverrides[blockConfig.blockConfigId] = overrideData.until;
     }
   }
-    
-  console.log("Updated block configs:", blockConfigs);
-  console.log("Block config overrides:", blockConfigOverrides);
 }
 
 function shouldBlockTab(tabInfo) {
@@ -67,7 +64,7 @@ function shouldBlockTabByBlockSet(tabInfo, blockSet) {
   const blockUrlList = blockSet.domains
   const blockTimeList = blockSet.times
   
-  console.log("blockConfigOverrides:", blockConfigOverrides)
+  // console.log("blockConfigOverrides:", blockConfigOverrides)
   if (blockConfigOverrides[blockSet.blockConfigId]) {
     if (blockConfigOverrides[blockSet.blockConfigId] > Date.now()) {
       console.log(`Tab allowed past ${blockSet.blockConfigId} by override until: ${new Date(blockConfigOverrides[blockSet.blockConfigId])}`);
@@ -97,19 +94,21 @@ function shouldBlockTabByBlockSet(tabInfo, blockSet) {
 }
 
 async function handleTabUpdated(tabId, changeInfo, tabInfo) {
-    if (tabInfo.status == "complete") {
-        await fetchBlockConfigs();
+  if (tabInfo.status == "complete") {
+    fetchBlockConfigs().then(() => {
+      console.log("Updated block configs:", blockConfigs);
+      console.log("Block config overrides:", blockConfigOverrides);
 
-        const blockingConfigId = shouldBlockTab(tabInfo);
-        if (blockingConfigId) {
-            const tabUpdate = {
-                loadReplace: true,
-                url: BLOCKED_HTML + `?id=${blockingConfigId}&url=${tabInfo.url}`
-            }
-            browser.tabs.update(tabId, tabUpdate);
-        }
-	}
-
+      const blockingConfigId = shouldBlockTab(tabInfo);
+      if (blockingConfigId) {
+          const tabUpdate = {
+              loadReplace: true,
+              url: BLOCKED_HTML + `?id=${blockingConfigId}&url=${tabInfo.url}`
+          }
+          browser.tabs.update(tabId, tabUpdate);
+      }
+    })
+  }
 }
 
 createMenus();
