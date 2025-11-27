@@ -34,12 +34,13 @@ async function showTab(tabId, saveBeforeSwitch = true) {
     //update current selection
     const key = curConfigId + 'key'
 
-    const result = await browser.storage.local.get(key)
-    tabData = result[key] ? result[key] : {}
-    document.getElementById('blockConfigName').value = tabData['blockConfigName'] || "";
-    document.getElementById('domains').value = tabData['domains'] ? tabData['domains']: ""
-    document.getElementById('times').value = tabData['times'] ? tabData['times'] : ""
-    document.getElementById('blockConfigOverride').value = tabData['blockConfigOverride'] || "";
+    browser.storage.local.get(key).then((result) => {
+        tabData = result[key] ? result[key] : {}
+        document.getElementById('blockConfigName').value = tabData['blockConfigName'] || "";
+        document.getElementById('domains').value = tabData['domains'] ? tabData['domains']: ""
+        document.getElementById('times').value = tabData['times'] ? tabData['times'] : ""
+        document.getElementById('blockConfigOverride').value = tabData['blockConfigOverride'] || "";
+    })
 }
 
 function saveTab() {

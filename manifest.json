@@ -35,15 +35,7 @@
     "permissions": [
 		"tabs",
         "menus",
-        "storage",
-        "web_accessible_resources"
-	],
-
-    "web_accessible_resources": [
-        {
-        "resources": ["blocked.css"],
-        "matches": ["<all_urls>"]
-        }
-    ]
+        "storage"
+	]
 
 }

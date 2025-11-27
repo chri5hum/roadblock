@@ -18,9 +18,8 @@ export async function setOverride(blockConfigId, duration) {
 
 export async function getOverride(blockConfigId) {
     const overrideKey = blockConfigId + 'override';
-
+    
     const result = await browser.storage.local.get(overrideKey);
-
     if (result && result[overrideKey]) {
         return result[overrideKey];
     } else {
@@ -47,7 +46,6 @@ export async function getBlockConfig(blockConfigId) {
         'times': data['times'] ? data['times'].split(',').map((time) => time.split('-')) : ["0000-2400"],
         'blockConfigOverride': data['blockConfigOverride'] || "",
     }
-    console.log(blockConfig)
 
     return blockConfig;
     
