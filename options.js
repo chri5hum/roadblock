@@ -40,6 +40,7 @@ async function showTab(tabId, saveBeforeSwitch = true) {
         document.getElementById('domains').value = tabData['domains'] ? tabData['domains']: ""
         document.getElementById('times').value = tabData['times'] ? tabData['times'] : ""
         document.getElementById('blockConfigOverride').value = tabData['blockConfigOverride'] || "";
+        document.getElementById('overrideDelay').value = tabData['overrideDelay'] || "0";
     })
 }
 
@@ -52,6 +53,7 @@ function saveTab() {
     tabData['domains'] = document.getElementById('domains').value
     tabData['times'] = document.getElementById('times').value
     tabData['blockConfigOverride'] = document.getElementById('blockConfigOverride').value
+    tabData['overrideDelay'] = document.getElementById('overrideDelay').value
 
     const key = curConfigId + 'key'
     log(`Saving tab data for ${key}: ${tabData}`)
