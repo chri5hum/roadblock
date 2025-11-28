@@ -1,2 +1,2 @@
-# Blocker
-Site blocker with override if you type a certain paragraph
+# Roadblock
+Current site blockers are too easily turned off for me

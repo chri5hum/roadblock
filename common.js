@@ -45,6 +45,7 @@ export async function getBlockConfig(blockConfigId) {
         'domains': data['domains'] ? data['domains'].split('\n') : [],
         'times': data['times'] ? data['times'].split(',').map((time) => time.split('-')) : ["0000-2400"],
         'blockConfigOverride': data['blockConfigOverride'] || "",
+        'overrideDelay': data['overrideDelay'] ? parseInt(data['overrideDelay'], 10) : 0,
     }
 
     return blockConfig;

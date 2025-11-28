@@ -1,9 +1,9 @@
 {
     "manifest_version": 3,
-    "name": "Borderify",
+    "name": "Roadblock",
     "version": "1.0",
 
-    "description": "Adds a red border to all webpages matching mozilla.org.",
+    "description": "Site blocker with overrides.",
 
     "icons": {
         "48": "icons/border-48.png"
@@ -23,7 +23,7 @@
 
     "browser_specific_settings": {
         "gecko": {
-            "id": "borderify@example.com"
+            "id": "roadblock@5f748112-260f-4ca4-a678-823a5d8d2857"
         }
     },
 
