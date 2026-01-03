@@ -1,8 +1,11 @@
 import { getBlockConfig, setOverride } from './common.js';
 
+//may need to wrap try catch. if there is a failure, then should just drop
 async function init(){
     const url = new URL(window.location.href);
-    const originalUrl = url.searchParams.get("url");
+    //need to do manual string parsing because originalURL may have '&' char inside
+    let originalUrl = url.href.split('url=').at(-1);
+    const currentTab = await browser.tabs.getCurrent();
 
     getBlockConfig(url.searchParams.get("id")).then((blockingConfig) => {
 
@@ -33,7 +36,7 @@ async function init(){
         function startCountdown(duration) {
             let timeLeft = blockingConfig.overrideDelay || 0;
             if (timeLeft <= 0) {
-                applyOverride(duration);
+                applyOverride(duration, currentTab.id);
                 return;
             }
             overrideBtn.disabled = true;
@@ -46,18 +49,18 @@ async function init(){
                     countdownDisplay.textContent = `Override in ${timeLeft} seconds...`;
                 } else {
                     clearInterval(countdownInterval);
-                    applyOverride(duration);
+                    applyOverride(duration, currentTab.id);
                 }
             }, 1000);
         }
 
-        async function applyOverride(duration) {
+        async function applyOverride(duration, currentTabId) {
             setOverride(blockingConfig.blockConfigId, duration).then(() => {
                 const tabUpdate = {
                     loadReplace: true,
                     url: originalUrl
                 }
-                browser.tabs.update(tabUpdate);
+                browser.tabs.update(currentTabId, tabUpdate);
             })
         }
     })
